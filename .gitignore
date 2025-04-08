@@ -1,0 +1,64 @@
+# === Java ===
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# === Maven ===
+/target/
+/.mvn/
+/pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# === Docker ===
+*.tar
+**/Dockerfile.*
+**/docker-compose*.yml
+.dockerignore
+
+# Ignore Docker build context artifacts (if any)
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# === Spring Boot specific ===
+spring.log
+
+# === IntelliJ IDEA ===
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# === Eclipse ===
+.project
+.classpath
+.settings/
+.c9/
+.loadpath
+.factorypath
+
+# === VS Code ===
+.vscode/
+
+# === Logs ===
+logs/
+*.log
+*.out
+
+# === OS generated ===
+.DS_Store
+Thumbs.db
+
+# === Environment and secrets ===
+.env
+*.env
+application-*.yml
+application-*.properties
+
