@@ -34,9 +34,6 @@ public class ComplaintServiceImpl implements ComplaintService {
     public ComplaintDTO createComplaint(ComplaintRequest complaintRequest, HttpServletRequest request) {
         log.info("Creating new complaint for product: {}, reporter: {}", complaintRequest.getProductId(), complaintRequest.getReporter());
 
-        String ipAddress = RequestUtil.getClientIp(request);
-        String country = countryService.getCountryByIp(ipAddress);
-
         Optional<Complaint> existingComplaint = complaintRepository.findByProductIdAndReporter(complaintRequest.getProductId(), complaintRequest.getReporter());
 
         if (existingComplaint.isPresent()) {
@@ -46,6 +43,9 @@ public class ComplaintServiceImpl implements ComplaintService {
             complaintRepository.save(complaint);
             return mapToDTO(complaint);
         }
+
+        String ipAddress = RequestUtil.getClientIp(request);
+        String country = countryService.getCountryByIp(ipAddress);
 
         Complaint complaint = Complaint.builder()
                 .productId(complaintRequest.getProductId())
@@ -125,6 +125,15 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     private ComplaintDTO mapToDTO(Complaint complaint) {
-        return ComplaintDTO.builder().id(complaint.getId()).productId(complaint.getProductId()).content(complaint.getContent()).createdDate(complaint.getCreatedDate()).reporter(complaint.getReporter()).country(complaint.getCountry()).counter(complaint.getCounter()).lastModified(complaint.getLastModified()).build();
+        return ComplaintDTO.builder()
+                .id(complaint.getId())
+                .productId(complaint.getProductId())
+                .content(complaint.getContent())
+                .createdDate(complaint.getCreatedDate())
+                .reporter(complaint.getReporter())
+                .country(complaint.getCountry())
+                .counter(complaint.getCounter())
+                .lastModified(complaint.getLastModified())
+                .build();
     }
 }

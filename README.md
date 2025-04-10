@@ -5,7 +5,8 @@ REST API for managing complaints.
 ## How to run
 
 ```bash
-docker-compose up --build
+mvn compile jib:dockerBuild
+docker-compose up
 ```
 
 ## Swagger
@@ -17,13 +18,22 @@ Credentials: admin/admin
 
 ## Client Remote IP discovery
 
-1. When app is deployed without proxy/load balancer, IP address is read directly from request remote address.
-2. When app is deployed with Load Balancer/ Reverse Proxy remote address is read from HEADER.
+The "Client Remote IP discovery" feature depends on deployment setup.
 Please check `pl/tzason/complaint/util/RequestUtil.java` implementation for details.
+
+**Setup A.**
+
+If this application is deployed in the standalone mode without any proxy/load balancer,
+then IP address is read directly from request `request.getRemoteAddr()` (default). 
+
+**Setup B.**
+
+Otherwise, when application is deployed with Load Balancer/ Reverse Proxy, remote address is read from HEADER `X-Forwarded-For`
+
 
 ### How to test?  
 
-### Local environment
+### 1. Local environment
 If you want to verify country discovery by IP using your local environment, please add IP to the header `X-Real-IP: 84.234.119.249`. Below 2 examples (PL and DE):
 
 * CURL PL IP address:
@@ -57,9 +67,9 @@ curl  -u admin:admin  -X 'POST' \
 }'
 ```
 
-### Access from another device 
+### 2. Access from another device 
 
-Then just run without header
+Then just run without header.
 
 ```bash
 curl  -u admin:admin  -X 'POST' \
