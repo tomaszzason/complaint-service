@@ -14,8 +14,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import pl.tzason.complaint.dto.ComplaintDTO;
 import pl.tzason.complaint.dto.ComplaintRequest;
 import pl.tzason.complaint.dto.PageResponse;
@@ -36,11 +43,11 @@ public class ComplaintController {
                     content = @Content(schema = @Schema(implementation = ComplaintDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<ComplaintDTO> createComplaint(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ComplaintDTO createComplaint(
             @Valid @RequestBody ComplaintRequest complaintRequest,
             HttpServletRequest request) {
-        ComplaintDTO createdComplaint = complaintService.createComplaint(complaintRequest, request);
-        return new ResponseEntity<>(createdComplaint, HttpStatus.CREATED);
+        return complaintService.createComplaint(complaintRequest, request);
     }
 
     @PutMapping("/{id}")
@@ -51,12 +58,10 @@ public class ComplaintController {
             @ApiResponse(responseCode = "404", description = "Complaint not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<ComplaintDTO> updateComplaint(
+    public ComplaintDTO updateComplaint(
             @Parameter(description = "Complaint ID") @PathVariable Long id,
-            @Valid @RequestBody ComplaintRequest complaintRequest,
-            HttpServletRequest request) {
-        ComplaintDTO updatedComplaint = complaintService.updateComplaint(id, complaintRequest, request);
-        return ResponseEntity.ok(updatedComplaint);
+            @Valid @RequestBody ComplaintRequest complaintRequest) {
+        return complaintService.updateComplaint(id, complaintRequest);
     }
 
     @GetMapping("/{id}")
@@ -66,15 +71,14 @@ public class ComplaintController {
                     content = @Content(schema = @Schema(implementation = ComplaintDTO.class))),
             @ApiResponse(responseCode = "404", description = "Complaint not found")
     })
-    public ResponseEntity<ComplaintDTO> getComplaintById(
+    public ComplaintDTO getComplaintById(
             @Parameter(description = "Complaint ID") @PathVariable Long id) {
-        ComplaintDTO complaint = complaintService.getComplaintById(id);
-        return ResponseEntity.ok(complaint);
+        return complaintService.getComplaintById(id);
     }
 
     @GetMapping
     @Operation(summary = "Get all complaints with pagination")
-    public ResponseEntity<PageResponse<ComplaintDTO>> getAllComplaints(
+    public PageResponse<ComplaintDTO> getAllComplaints(
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Sort by") @RequestParam(defaultValue = "id") String sort,
@@ -84,19 +88,18 @@ public class ComplaintController {
                 Sort.Direction.DESC : Sort.Direction.ASC;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
-        PageResponse<ComplaintDTO> complaints = complaintService.getAllComplaints(pageable);
-        return ResponseEntity.ok(complaints);
+        return complaintService.getAllComplaints(pageable);
     }
 
     @GetMapping("/country/{country}")
     @Operation(summary = "Get complaints by country with pagination")
-    public ResponseEntity<PageResponse<ComplaintDTO>> getComplaintsByCountry(
+    public PageResponse<ComplaintDTO> getComplaintsByCountry(
             @Parameter(description = "Country code") @PathVariable String country,
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        PageResponse<ComplaintDTO> complaints = complaintService.getComplaintsByCountry(country, pageable);
-        return ResponseEntity.ok(complaints);
+        return complaintService.getComplaintsByCountry(country, pageable);
+
     }
 }

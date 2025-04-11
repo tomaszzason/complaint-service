@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -29,16 +31,22 @@ public class CountryService {
         log.info("Fetching country for IP: {}", ipAddress);
         String url = countryApiUrl + "/" + ipAddress;
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<>() {}
+        );
 
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            String country = (String) response.getBody().get("country");
-            log.info("Country found for IP {}: {}", ipAddress, country);
-            return country;
+        if (!response.getStatusCode().is2xxSuccessful() ||
+                response.getBody() == null ||
+                response.getBody().get("country") == null) {
+            throw new IllegalArgumentException("Invalid response from country API. Status: " + response.getStatusCode() + " Body: " + response.getBody());
         }
 
-        log.warn("Could not determine country for IP: {}", ipAddress);
-        return getDefaultCountry(ipAddress, new RuntimeException("Failed to get country"));
+        String country = (String) response.getBody().get("country");
+        log.info("Country found for IP {}: {}", ipAddress, country);
+        return country;
     }
 
     public String getDefaultCountry(String ipAddress, Throwable throwable) {

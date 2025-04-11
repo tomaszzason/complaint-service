@@ -9,15 +9,17 @@ import pl.tzason.complaint.dto.ComplaintRequest;
 import pl.tzason.complaint.model.Complaint;
 import pl.tzason.complaint.repository.ComplaintRepository;
 import pl.tzason.complaint.service.ComplaintService;
-import pl.tzason.complaint.service.ComplaintServiceImpl;
 import pl.tzason.complaint.service.CountryService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ComplaintServiceTest {
 
@@ -29,7 +31,7 @@ public class ComplaintServiceTest {
     public void setup() {
         complaintRepository = Mockito.mock(ComplaintRepository.class);
         countryService = Mockito.mock(CountryService.class);
-        complaintService = new ComplaintServiceImpl(complaintRepository, countryService);
+        complaintService = new ComplaintService(complaintRepository, countryService);
     }
 
     @Test
@@ -55,7 +57,7 @@ public class ComplaintServiceTest {
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         ComplaintDTO result = complaintService.createComplaint(input, request);
-        assertEquals(2, result.getCounter());
+        assertEquals(2, result.counter());
         verify(complaintRepository, times(1)).save(any());
     }
 }

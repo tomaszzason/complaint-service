@@ -8,22 +8,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import pl.tzason.complaint.dto.ComplaintDTO;
 import pl.tzason.complaint.dto.ComplaintRequest;
 import pl.tzason.complaint.dto.PageResponse;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc // testing endpoints with MockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
 @WithMockUser(username = "admin")
+@ActiveProfiles("test")
 public class ComplaintControllerTest {
 
     @Autowired
@@ -69,10 +70,10 @@ public class ComplaintControllerTest {
         String json = result.getResponse().getContentAsString();
         ComplaintDTO complaint = objectMapper.readValue(json, ComplaintDTO.class);
 
-        assertEquals(REPORTER, complaint.getReporter());
-        assertEquals(PRODUCT_ID, complaint.getProductId());
-        assertEquals(CONTENT, complaint.getContent());
-        assertEquals(2, complaint.getCounter());
+        assertEquals(REPORTER, complaint.reporter());
+        assertEquals(PRODUCT_ID, complaint.productId());
+        assertEquals(CONTENT, complaint.content());
+        assertEquals(2, complaint.counter());
     }
 
     @Test
@@ -97,10 +98,10 @@ public class ComplaintControllerTest {
         String json = result.getResponse().getContentAsString();
         ComplaintDTO complaint = objectMapper.readValue(json, ComplaintDTO.class);
 
-        assertEquals(REPORTER, complaint.getReporter());
-        assertEquals(PRODUCT_ID, complaint.getProductId());
-        assertEquals(CONTENT, complaint.getContent());
-        assertEquals(1, complaint.getCounter());
+        assertEquals(REPORTER, complaint.reporter());
+        assertEquals(PRODUCT_ID, complaint.productId());
+        assertEquals(CONTENT, complaint.content());
+        assertEquals(1, complaint.counter());
     }
 
     @Test
@@ -114,9 +115,9 @@ public class ComplaintControllerTest {
         String json = result.getResponse().getContentAsString();
         ComplaintDTO complaint = objectMapper.readValue(json, ComplaintDTO.class);
 
-        assertEquals("tzason@example.com", complaint.getReporter());
-        assertEquals("PROD-001", complaint.getProductId());
-        assertEquals("Produkt nie działa zgodnie z opisem.", complaint.getContent());
+        assertEquals("tzason@example.com", complaint.reporter());
+        assertEquals("PROD-001", complaint.productId());
+        assertEquals("Produkt nie działa zgodnie z opisem.", complaint.content());
     }
 
     @Test
@@ -130,10 +131,10 @@ public class ComplaintControllerTest {
         String json = result.getResponse().getContentAsString();
         PageResponse<ComplaintDTO> complaint = objectMapper.readValue(json, new TypeReference<>() {});
 
-        assertEquals(1, complaint.getContent().size());
-        assertEquals("PL", complaint.getContent().get(0).getCountry());
-        assertEquals("PROD-001", complaint.getContent().get(0).getProductId());
-        assertEquals("Produkt nie działa zgodnie z opisem.", complaint.getContent().get(0).getContent());
+        assertEquals(1, complaint.content().size());
+        assertEquals("PL", complaint.content().get(0).country());
+        assertEquals("PROD-001", complaint.content().get(0).productId());
+        assertEquals("Produkt nie działa zgodnie z opisem.", complaint.content().get(0).content());
     }
 
 
@@ -148,6 +149,14 @@ public class ComplaintControllerTest {
         String json = result.getResponse().getContentAsString();
         PageResponse<ComplaintDTO> complaint = objectMapper.readValue(json, new TypeReference<>() {});
 
-        assertEquals(2, complaint.getContent().size());
+        assertEquals(2, complaint.content().size());
+    }
+
+    @Test
+    public void shouldFailOnUpdateWhenComplaintNotFound() throws Exception {
+
+        mockMvc.perform(get("/api/complaints/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
